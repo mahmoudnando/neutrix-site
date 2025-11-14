@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>امتحان تفاعلي (من PDF)</title>
+    <!-- تحميل Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* استخدام خط Inter للإنجليزية و Cairo للعربية */
+        body {
+            font-family: 'Inter', 'Cairo', sans-serif;
+        }
+        /* كلاسات مخصصة للتصحيح */
+        .correct {
+            background-color: #16a34a !important; /* bg-green-600 */
+            color: white !important;
+            border-color: #22c55e; /* border-green-500 */
+            border-width: 2px;
+        }
+        .incorrect {
+            background-color: #dc2626 !important; /* bg-red-600 */
+            color: white !important;
+            border-color: #ef4444; /* border-red-500 */
+            border-width: 2px;
+        }
+        /* إخفاء العنصر */
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-gray-800 rounded-2xl shadow-2xl p-6 sm:p-10 w-full max-w-3xl">
+
+        <!-- حاوية الاختبار -->
+        <div id="quiz-container">
+            <header class="text-center mb-6">
+                <h1 class="text-3xl font-bold text-cyan-400">امتحان شبكات الحاسب (بنك الأسئلة)</h1>
+                <p id="progress" class="text-lg text-gray-400 mt-2"></p>
+            </header>
+
+            <!-- منطقة السؤال -->
+            <div class="bg-gray-900 p-6 rounded-lg shadow-inner min-h-[100px] flex items-center justify-center">
+                <h2 id="question" class="text-2xl font-semibold text-center leading-relaxed" dir="ltr"></h2>
+            </div>
+
+            <!-- منطقة الخيارات -->
+            <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+                <!-- سيتم ملء الخيارات هنا عبر جافاسكريبت -->
+            </div>
+
+            <!-- منطقة الإفادة (صحيح/خاطئ) -->
+            <div id="feedback" class="text-center text-xl font-bold mt-6 min-h-[2rem]">
+                <!-- سيتم عرض الإفادة هنا -->
+            </div>
+
+            <!-- زر التالي -->
+            <button id="next-btn" class="hidden bg-cyan-600 text-white font-bold py-3 px-8 rounded-lg mt-8 w-full hover:bg-cyan-700 transition-colors duration-300 shadow-lg text-lg">
+                التالي
+            </button>
+        </div>
+
+        <!-- حاوية النتائج (مخفية افتراضيًا) -->
+        <div id="results-container" class="hidden text-center">
+            <h2 class="text-4xl font-bold text-cyan-400 mb-4">اكتمل الاختبار!</h2>
+            <p id="score" class="text-3xl text-white mb-8"></p>
+            <button id="restart-btn" class="bg-gray-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-700 transition-colors duration-300 shadow-lg text-lg">
+                إعادة الاختبار
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. تعريف الأسئلة (من ملف PDF) ---
+        const allQuestions = [
+            // Page 1
+            { question: "1. A computer network:", type: 'mcq', options: ['Is a collection of hardware components and computers', 'Is interconnected by communication channels', 'Allows sharing of resources and information', 'All of the above'], answer: 'All of the above' },
+            { question: "2. What is a firewall in a computer network?", type: 'mcq', options: ['The physical boundary of the network', 'An operating system of a computer network', 'A system designed to prevent unauthorized access', 'A web browsing software'], answer: 'A system designed to prevent unauthorized access' },
+            { question: "3. What is the use of Bridge in the network?", type: 'mcq', options: ['To connect LANS', 'To separate LANs', 'To control network speed', 'All of the above'], answer: 'To connect LANS' },
+            { question: "4. Each IP packet must contain:", type: 'mcq', options: ['Only Source address', 'Only Destination address', 'Source and Destination address', 'Source or Destination address'], answer: 'Source and Destination address' },
+            { question: "5. Which of these is not a communication channel?", type: 'mcq', options: ['Satellite', 'Microwave', 'Radio wave', 'Wi-Fi'], answer: 'Wi-Fi' },
+            // Page 2
+            { question: "6. MAN Stands for", type: 'mcq', options: ['Metropolitan Area Network', 'Main Area Network', 'Metropolitan Access Network', 'Metro Access Network'], answer: 'Metropolitan Area Network' },
+            { question: "7. Which of these is not an example of unguided media?", type: 'mcq', options: ['Optical Fibre Cable', 'Radio wave', 'Bluetooth', 'Satellite'], answer: 'Optical Fibre Cable' },
+            { question: "8. In which topology is all the nodes connected through a single Coaxial cable?", type: 'mcq', options: ['Star', 'Tree', 'Bus', 'Ring'], answer: 'Bus' },
+            { question: "9. Which of the following is the smallest network?", type: 'mcq', options: ['WAN', 'MAN', 'LAN', 'Wi-Fi'], answer: 'LAN' },
+            { question: "10. Which protocol is used for the transfer of hypertext content over the web?", type: 'mcq', options: ['HTML', 'HTTP', 'TCP/IP'], answer: 'HTTP' },
+            // Page 3
+            { question: "11. Two devices are in network if", type: 'mcq', options: ['a process in one device is able to exchange information with a process in another device', 'a process is running on both devices', 'the processes running of different devices are of same type', 'none of the mentioned'], answer: 'a process in one device is able to exchange information with a process in another device' },
+            { question: "12. What is a standalone computer?", type: 'mcq', options: ['A computer that is not connected to a network', 'A computer that is being used as a server', 'A computer that does not have any peripherals attached to it', 'A computer that is used by only one person'], answer: 'A computer that is not connected to a network' },
+            { question: "13. Central Computer which is powerful than other computers in the network is called as", type: 'mcq', options: ['Client', 'Server', 'Hub', 'Switch'], answer: 'Server' },
+            { question: "14. Network in which every computer is capable of playing the role of a client, or a server or both at same time is called", type: 'mcq', options: ['peer-to-peer network', 'local area network', 'dedicated server network', 'wide area network'], answer: 'peer-to-peer network' },
+            { question: "15. In peer-to-peer network, each computer in a network is referred as", type: 'mcq', options: ['server', 'client', 'peer', 'sender'], answer: 'peer' },
+            // Page 4
+            { question: "16. Which transmission media is capable of having a much higher bandwidth (data capacity)?", type: 'mcq', options: ['Coaxial', 'Twisted pair cable', 'Untwisted cable', 'Fiber optic'], answer: 'Fiber optic' },
+            { question: "17. Which type of transmission media is the least expensive to manufacture?", type: 'mcq', options: ['Coaxial', 'Twisted pair cable', 'CAT cable', 'Fiber optic'], answer: 'Twisted pair cable' },
+            { question: "18. Which of these components is internal to a computer and is required to connect the computer to a network ?", type: 'mcq', options: ['Wireless Access Point', 'Network Interface card', 'Switch', 'Hub'], answer: 'Network Interface card' },
+            { question: "19. A device that forwards data packet from one network to another is called a", type: 'mcq', options: ['Bridge', 'Router', 'Hub', 'Gateway'], answer: 'Router' },
+            { question: "20. Which of the following is the fastest media of data transfer?", type: 'mcq', options: ['Co-axial Cable', 'Untwisted Wire', 'Telephone Lines', 'Fiber Optic'], answer: 'Fiber Optic' },
+            // Page 5
+            { question: "21. Hub is a", type: 'mcq', options: ['Broadcast device', 'Uni-cast device', 'Multi-cast device', 'None of the above'], answer: 'Broadcast device' },
+            { question: "22. Switch is a", type: 'mcq', options: ['Broadcast device', 'Uni-cast device', 'Multi-cast device', 'None of the above'], answer: 'Uni-cast device' },
+            { question: "23. The device that can operate in place of a hub is a :", type: 'mcq', options: ['Switch', 'Bridge', 'Router', 'Gateway'], answer: 'Switch' },
+            { question: "24. A repeater takes a weak and corrupted signal and", type: 'mcq', options: ['Amplifies', 'Regenerates', 'Resembles', 'Reroutes'], answer: 'Regenerates' },
+            { question: "25. Which of the following is not a type of cloud?", type: 'mcq', options: ['Private', 'Public', 'Protected', 'Hybrid'], answer: 'Protected' },
+            // Page 6
+            { question: "27. Protocols are", type: 'mcq', options: ['Agreements on how communication components and devices are to communicate', 'Logical communication channels for transferring data', 'Physical communication channels used for transferring data', 'None of above'], answer: 'Agreements on how communication components and devices are to communicate' },
+            { question: "28. In computer, converting a digital signal in to an analog signal is called", type: 'mcq', options: ['modulation', 'demodulation', 'conversion', 'transformation'], answer: 'modulation' },
+            { question: "1.Which address is used in an internet employing the TCP/IP protocols?", type: 'mcq', options: ['physical address and logical address', 'port address', 'specific address', 'all of the mentioned'], answer: 'all of the mentioned' },
+            { question: "2.Which address identifies a process on a host?", type: 'mcq', options: ['physical address', 'logical address', 'port address', 'specific address'], answer: 'port address' },
+            { question: "3. Transmission data rate is decided by", type: 'mcq', options: ['network layer', 'physical layer', 'data link layer', 'transport layer'], answer: 'physical layer' },
+            // Page 7
+            { question: "4. When collection of various computers seems a single coherent system to its client, then it is called", type: 'mcq', options: ['computer network', 'distributed system', 'both (a) and (b)', 'none of the mentioned'], answer: 'distributed system' },
+            { question: "5. Which one of the following computer network is built on the top of another network?", type: 'mcq', options: ['prior network', 'chief network', 'prime network', 'overlay network'], answer: 'overlay network' },
+            { question: "6.Bluetooth is an example of", type: 'mcq', options: ['personal area network', 'local area network', 'virtual private network', 'none of the mentioned'], answer: 'personal area network' },
+            { question: "7.A ... is a device that forwards packets between networks by processing the routing information included in the packet.", type: 'mcq', options: ['bridge', 'firewall', 'router', 'all of the mentioned'], answer: 'router' },
+            { question: "8.A list of protocols used by a system, one protocol per layer, is called", type: 'mcq', options: ['protocol architecture', 'protocol stack', 'protocol suit', 'none of the mentioned'], answer: 'protocol stack' },
+            { question: "9.Network congestion occurs", type: 'mcq', options: ['in case of traffic overloading', 'when a system terminates', 'when connection between two nodes terminates', 'none of the mentioned'], answer: 'in case of traffic overloading' },
+            { question: "10.Which one of the following extends a private network across public networks?", type: 'mcq', options: ['local area network', 'virtual private network', 'enterprise private network', 'storage area network'], answer: 'virtual private network' },
+            { question: "11. The structure or format of data is called", type: 'mcq', options: ['Syntax', 'Semantics', 'Struct', 'None of the mentioned'], answer: 'Syntax' },
+            // Page 8
+            { question: "14.Which of this is not a network edge device?", type: 'mcq', options: ['PC', 'Smartphones', 'Servers', 'Switch'], answer: 'Switch' },
+            { question: "15.Delimiting and synchronization of data exchange is provided by", type: 'mcq', options: ['Application layer', 'Session layer', 'Transport layer', 'Link layer'], answer: 'Session layer' },
+            { question: "16.The ... address identifies a process on a host.", type: 'mcq', options: ['physical', 'IP', 'port', 'specific'], answer: 'port' },
+            { question: "17.The ... address uniquely defines a host on the Internet.", type: 'mcq', options: ['physical', 'IP', 'port', 'specific'], answer: 'IP' },
+            { question: "20.A ... connection provides a dedicated link between two devices.", type: 'mcq', options: ['point-to-point', 'multipoint', 'primary', 'secondary'], answer: 'point-to-point' },
+            { question: "21. Devices may be arranged in a ... topology.", type: 'mcq', options: ['ring', 'mesh', 'bus', 'all of the above'], answer: 'all of the above' },
+            { question: "22.A ... is a data communication system within a building, plant, or campus, or between nearby buildings.", type: 'mcq', options: ['LAN', 'MAN', 'WAN', 'none of the above'], answer: 'LAN' },
+            { question: "23.Which of the following is required to communicate between two computers?", type: 'mcq', options: ['communications software', 'protocol', 'communication hardware', 'all of above including access to transmission medium'], answer: 'all of above including access to transmission medium' },
+            // Page 9
+            { question: "24. What is NIC used for?", type: 'mcq', options: ['To remotely access PC', 'To connect computer to a network', 'lt is used in junipers routers for gateway card', 'None'], answer: 'To connect computer to a network' },
+            { question: "25.In a type of computer network, what does MAN stands for?", type: 'mcq', options: ['Major area network', 'Mini area network', 'Metropolitan area network', 'Micro area network'], answer: 'Metropolitan area network' },
+            { question: "27.Which of the following is the type of the computer network?", type: 'mcq', options: ['Metropolitan area network (MAN)', 'Local area network (LAN)', 'Personal area network (PAN)', 'All of the above'], answer: 'All of the above' },
+            { question: "28.How many layers does OSI have?", type: 'mcq', options: ['4', '7', '5', '6'], answer: '7' },
+            { question: "29.Collection of network or networks is called", type: 'mcq', options: ['Intranet', 'Internet', 'Extranet', 'LAN network'], answer: 'Internet' },
+            { question: "31.What is a Firewall in Computer Network?", type: 'mcq', options: ['The physical boundary of Network', 'An operating System of Computer Network', 'A system designed to prevent unauthorized access', 'A web browsing Software'], answer: 'A system designed to prevent unauthorized access' },
+            { question: "32. What is the meaning of Bandwidth in Network?", type: 'mcq', options: ['Transmission capacity of a communication channels', 'Connected Computers in the Network', 'Class of IP used in Network', 'None of Above'], answer: 'Transmission capacity of a communication channels' },
+            // Page 10
+            { question: "33. ADSL is the abbreviation of", type: 'mcq', options: ['Asymmetric Dual Subscriber Line', 'Asymmetric Digital System Line', 'Asymmetric Dual System Line', 'Asymmetric Digital Subscriber Line'], answer: 'Asymmetric Digital Subscriber Line' },
+            { question: "34. The Internet is an example of", type: 'mcq', options: ['Cell switched network', 'circuit switched network', 'Packet switched network', 'All of above'], answer: 'Packet switched network' },
+            { question: "35. Which of the following includes the benefit of the Networking?", type: 'mcq', options: ['File Sharing', 'Easier access to Resources', 'Easier Backups', 'All of the Above'], answer: 'All of the Above' },
+            { question: "36. Which of the following is not the Networking Devices?", type: 'mcq', options: ['Gateways', 'Linux', 'Routers', 'Firewalls'], answer: 'Linux' },
+            { question: "37.We can divide today's networks into ... broad categories based on switching.", type: 'mcq', options: ['four', 'three', 'five', 'two'], answer: 'two' },
+            { question: "38.A ... is a device that operates only in the physical layer.", type: 'mcq', options: ['passive hub', 'repeater', 'bridge', 'router'], answer: 'repeater' },
+            { question: "40. Which protocol assigns IP address to the client connected in the internet?", type: 'mcq', options: ['DHCP', 'IP', 'RPC', 'none of the above'], answer: 'DHCP' },
+            // Page 11
+            { question: "41. ... is a network that covers geographic areas that are larger, such as districts or cities.", type: 'mcq', options: ['LAN', 'MAN', 'WAN'], answer: 'MAN' },
+            { question: "42.HTTP is the acronym of", type: 'mcq', options: ['Hyper Text Transfer Protocol', 'Hyper Test Transfer Protocol', 'Hyper Text Transport Protocol', 'Hyper Text Transport Program'], answer: 'Hyper Text Transfer Protocol' },
+            { question: "44. DHCP is the abbreviation of", type: 'mcq', options: ['Dynamic Host Control Protocol', 'Dynamic Host Configuration Protocol', 'Dynamic Hyper Control Protocol', 'Dynamic Hyper Configuration Protocol'], answer: 'Dynamic Host Configuration Protocol' },
+            { question: "47. In DSL telco provides these services", type: 'mcq', options: ['Wired phone access', 'ISP', 'All of the mentioned', 'None of the mentioned'], answer: 'All of the mentioned' },
+            { question: "48. Physical or logical arrangement of network is", type: 'mcq', options: ['Topology', 'Routing', 'Networking', 'None of the mentioned'], answer: 'Topology' },
+            { question: "49. In which topology there is a central controller or hub?", type: 'mcq', options: ['Star', 'Mesh', 'Ring', 'Bus'], answer: 'Star' },
+            { question: "50. This topology requires multi point connection", type: 'mcq', options: ['Star', 'Mesh', 'Ring', 'Bus'], answer: 'Bus' },
+            { question: "51. Data communication system within a building or campus is", type: 'mcq', options: ['LAN', 'WAN', 'MAN', 'None of the mentioned'], answer: 'LAN' },
+            { question: "1-6 DNS is the abbreviation of", type: 'mcq', options: ['Dynamic Name System', 'Dynamic Network System', 'Domain Name System', 'Domain Network Service'], answer: 'Domain Name System' },
+            { question: "1-8 ADSL is the abbreviation of", type: 'mcq', options: ['Asymmetric Dual Subscriber Line', 'Asymmetric Digital System Line', 'Asymmetric Dual System Line', 'Asymmetric Digital Subscriber Line'], answer: 'Asymmetric Digital Subscriber Line' },
+            // Page 12
+            { question: "1-9 What is the use of Bridge in Network?", type: 'mcq', options: ['to connect LANS', 'to separate LANS', 'to control Network Speed', 'All of the above'], answer: 'to connect LANS' },
+            { question: "2-9 How many layers are in the TCP/IP model?", type: 'mcq', options: ['4 layers', '5 layers', '6 layers', '7 layers'], answer: '4 layers' },
+            { question: "2-1 Each IP packet must contain", type: 'mcq', options: ['Only Source address', 'Only Destination address', 'Source and Destination address', 'Source or Destination address'], answer: 'Source and Destination address' },
+            { question: "2-2 Bridge works in which layer of the OSI model?", type: 'mcq', options: ['Appliation layer', 'Transport layer', 'Network layer', 'Datalink layer'], answer: 'Datalink layer' },
+            { question: "2-3 ... provides a connection-oriented reliable service for sending messages", type: 'mcq', options: ['TCP', 'IP', 'UDP', 'All of the above'], answer: 'TCP' },
+            { question: "2-4 Which layers of the OSI model are host-to-host layers?", type: 'mcq', options: ['Transport, Session, Persentation, Application', 'Network, Transport, Session, Presentation', 'Datalink, Network, Transport, Session', 'Physical, Datalink, Network, Transport'], answer: 'Transport, Session, Persentation, Application' },
+            { question: "2-7 The last address of IP address represents", type: 'mcq', options: ['Unicast address', 'Network address', 'Broadcast address', 'None of above'], answer: 'Broadcast address' },
+            { question: "2-10 Which of the following layer of OSI model also called end-to-end layer?", type: 'mcq', options: ['Presentation layer', 'Network layer', 'Session layer', 'Transport layer'], answer: 'Transport layer' },
+            { question: "1. Which is not a application layer protocol?", type: 'mcq', options: ['HTTP', 'SMTP', 'FTP', 'TCP'], answer: 'TCP' },
+            // Page 13
+            { question: "2. The packet of information at the application layer is called", type: 'mcq', options: ['Packet', 'Message', 'Segment', 'Frame'], answer: 'Message' },
+            { question: "3. Which one of the following is an architecture paradigms?", type: 'mcq', options: ['Peer to peer', 'Client-server', 'HTTP', 'Both Peer-to-Peer & Client-Server'], answer: 'Both Peer-to-Peer & Client-Server' },
+            { question: "4. Application developer has permission to decide the following on transport layer side", type: 'mcq', options: ['Transport layer protocol', 'Maximum buffer size', 'Both Transport layer protocol and Maximum buffer size', 'None of the mentioned'], answer: 'Transport layer protocol' },
+            { question: "5. Application layer offers ... service.", type: 'mcq', options: ['End to end', 'Process to process', 'Both End to end and Process to process', 'None of the mentioned'], answer: 'Process to process' },
+            { question: "6. E-mail is", type: 'mcq', options: ['Loss-tolerant application', 'Bandwidth-sensitive application', 'Elastic application', 'None of the mentioned'], answer: 'Elastic application' },
+            { question: "8. Which of the following is an application layer service?", type: 'mcq', options: ['Network virtual terminal', 'File transfer, access, and management', 'Mail service', 'All of the mentioned'], answer: 'All of the mentioned' },
+            { question: "3. The time required to examine the packet's header and determine where to direct the packet is part of", type: 'mcq', options: ['Processing delay', 'Queuing delay', 'Transmission delay', 'Propagation delay'], answer: 'Processing delay' },
+            { question: "8. In a network, If P is the only packet being transmitted and there was no earlier transmission, which of the following delays could be zero?", type: 'mcq', options: ['Propagation delay', 'Queuing delay', 'Transmission delay', 'Processing delay'], answer: 'Queuing delay' },
+            { question: "9. Transmission delay does not depend on", type: 'mcq', options: ['Packet length', 'Distance between the routers', 'Transmission rate', 'Bandwidth of medium'], answer: 'Distance between the routers' },
+            // Page 14
+            { question: "10. Propagation delay depends on", type: 'mcq', options: ['Packet length', 'Transmission rate', 'Distance between the routers', 'Speed of the CPU'], answer: 'Distance between the routers' },
+            { question: "1. The attacker using a network of compromised devices is known as", type: 'mcq', options: ['Internet', 'Botnet', 'Telnet', 'D-net'], answer: 'Botnet' },
+            { question: "1. Which of this is not a guided media?", type: 'mcq', options: ['Fiber optical cable', 'Coaxial cable', 'Wireless LAN', 'Copper wire'], answer: 'Wireless LAN' },
+            { question: "1. The number of objects in a Web page which consists of 4 jpeg images and HTML text is", type: 'mcq', options: ['4', '1', '5', '7'], answer: '5' },
+            { question: "2. The default connection type used by HTTP is", type: 'mcq', options: ['Persistent', 'Non-persistent', 'Can be either persistent or non-persistent depending on connection request', 'None of the mentioned'], answer: 'Persistent' },
+            { question: "8. The ... method when used in the method field, leaves entity body empty.", type: 'mcq', options: ['POST', 'SEND', 'GET', 'PUT'], answer: 'GET' },
+            { question: "7. The values GET, POST, HEAD etc are specified in ... of HTTP message", type: 'mcq', options: ['Request line', 'Header line', 'Status line', 'Entity body'], answer: 'Request line' },
+            { question: "6. The first line of HTTP request message is called", type: 'mcq', options: ['Request line', 'Header line', 'Status line', 'Entity line'], answer: 'Request line' },
+            // Page 15
+            { question: "9. The HTTP response message leaves out the requested object when ... method is used", type: 'mcq', options: ['GET', 'POST', 'HEAD', 'PUT'], answer: 'HEAD' },
+            { question: "10. Find the oddly matched HTTP status codes", type: 'mcq', options: ['200 OK', '400 Bad Request', '301 Moved permanently', '304 Not Found'], answer: '304 Not Found' },
+            { question: "13. Which of the following is present in both an HTTP request line and a status line?", type: 'mcq', options: ['HTTP version number', 'URL', 'Method', 'None of the mentioned'], answer: 'HTTP version number' },
+            { question: "12. The conditional GET mechanism", type: 'mcq', options: ['Imposes conditions on the objects to be requested', 'Limits the number of response from a server', 'Helps to keep a cache upto date', 'None of the mentioned'], answer: 'Helps to keep a cache upto date' },
+            { question: "1. The physical layer is concerned with", type: 'mcq', options: ['bit-by-bit delivery', 'process to process delivery', 'application to application delivery', 'port to port delivery'], answer: 'bit-by-bit delivery' },
+            { question: "4. The portion of physical layer that interfaces with the media access control sublayer is called", type: 'mcq', options: ['physical signalling sublayer', 'physical data sublayer', 'physical address sublayer', 'physical transport sublayer'], answer: 'physical signalling sublayer' },
+            { question: "5. The physical layer provides", type: 'mcq', options: ['mechanical specifications of electrical connectors and cables', 'electrical specification of transmission line signal level', 'specification for IR over optical fiber', 'all of the mentioned'], answer: 'all of the mentioned' },
+            { question: "7. The physical layer is responsible for", type: 'mcq', options: ['line coding', 'channel coding', 'modulation', 'all of the mentioned'], answer: 'all of the mentioned' },
+            { question: "8. The physical layer translates logical communication requests from the ... into hardware specific operations.", type: 'mcq', options: ['data link layer', 'network layer', 'trasnport layer', 'application layer'], answer: 'data link layer' },
+            // Page 16
+            { question: "9. A single channel is shared by multiple signals by", type: 'mcq', options: ['analog modulation', 'digital modulation', 'multiplexing', 'phase modulation'], answer: 'multiplexing' },
+            { question: "10. Wireless transmission of signals can be done via", type: 'mcq', options: ['radio waves', 'microwaves', 'infrared', 'all of the mentioned'], answer: 'all of the mentioned' },
+            { question: "1. The network layer is concerned with ... of data.", type: 'mcq', options: ['bits', 'frames', 'packets', 'bytes'], answer: 'packets' },
+            { question: "2. Which one of the following is not a function of network layer?", type: 'mcq', options: ['routing', 'inter-networking', 'congestion control', 'error control'], answer: 'error control' },
+            { question: "3. A 4 byte IP address consists of", type: 'mcq', options: ['only network address', 'only host address', 'network address & host address', 'network address & MAC address'], answer: 'network address & host address' },
+            { question: "6. Which of the following is not correct in relation to multi-destination routing?", type: 'mcq', options: ['is same as broadcast routing', 'contains the list of all destinations', 'data is not sent by packets', 'there are multiple receivers'], answer: 'data is not sent by packets' },
+            { question: "9. The network layer protocol for internet is", type: 'mcq', options: ['ethernet', 'internet protocol', 'hypertext transfer protocol', 'file transfer protocol'], answer: 'internet protocol' },
+            { question: "1. Transport layer aggregates data from different applications into a single stream before passing it to", type: 'mcq', options: ['network layer', 'data link layer', 'application layer', 'physical layer'], answer: 'network layer' },
+            { question: "2. Which of the following are transport layer protocols used in networking?", type: 'mcq', options: ['TCP and FTP', 'UDP and HTTP', 'TCP and UDP', 'HTTP and FTP'], answer: 'TCP and UDP' },
+            // Page 17
+            { question: "3. User datagram protocol is called connectionless because", type: 'mcq', options: ['all UDP packets are treated independently by transport layer', 'it sends data as a stream of related packets', 'it is received in the same order as sent order', 'it sends data very quickly'], answer: 'all UDP packets are treated independently by transport layer' },
+            { question: "4. Transmission control protocol", type: 'mcq', options: ['is a connection-oriented protocol', 'uses a three way handshake to establish a connection', 'receives data from application as a single stream', 'all of the mentioned'], answer: 'all of the mentioned' },
+            { question: "5. An endpoint of an inter-process communication flow across a computer network is called", type: 'mcq', options: ['socket', 'pipe', 'port', 'machine'], answer: 'socket' },
+            { question: "8. A ... is a TCP name for a transport service access point.", type: 'mcq', options: ['port', 'pipe', 'node', 'protocol'], answer: 'port' },
+            { question: "9. Transport layer protocols deals with", type: 'mcq', options: ['application to application communication', 'process to process communication', 'node to node communication', 'man to man communication'], answer: 'process to process communication' },
+            { question: "10. Which of the following is a transport layer protocol?", type: 'mcq', options: ['stream control transmission protocol', 'internet control message protocol', 'neighbor discovery protocol', 'dynamic host configuration protocol'], answer: 'stream control transmission protocol' },
+        ];
+
+
+        // --- 2. الإشارة إلى عناصر الصفحة ---
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+        const questionEl = document.getElementById('question');
+        const optionsContainer = document.getElementById('options-container');
+        const progressEl = document.getElementById('progress');
+        const feedbackEl = document.getElementById('feedback');
+        const nextBtn = document.getElementById('next-btn');
+        const scoreEl = document.getElementById('score');
+        const restartBtn = document.getElementById('restart-btn');
+
+        // --- 3. متغيرات حالة الاختبار ---
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answerSelected = false;
+
+        // --- 4. وظائف الاختبار ---
+
+        /** بدء الاختبار أو إعادة تشغيله */
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            answerSelected = false;
+            resultsContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            nextBtn.classList.add('hidden');
+            loadQuestion();
+        }
+
+        /** تحميل السؤال الحالي */
+        function loadQuestion() {
+            answerSelected = false; // السماح باختيار إجابة للسؤال الجديد
+            feedbackEl.textContent = ''; // مسح الإفادة السابقة
+            nextBtn.classList.add('hidden'); // إخفاء زر التالي
+            optionsContainer.innerHTML = ''; // مسح الخيارات القديمة
+
+            const currentQuestion = allQuestions[currentQuestionIndex];
+            
+            // تحديث نص السؤال والتقدم
+            progressEl.textContent = `السؤال ${currentQuestionIndex + 1} من ${allQuestions.length}`;
+            questionEl.textContent = currentQuestion.question;
+            
+            // الأسئلة كلها بالإنجليزية، لذا نجعل اتجاه النص LTR
+            questionEl.dir = "ltr";
+            
+            // إنشاء أزرار الخيارات
+            if (currentQuestion.type === 'mcq') {
+                optionsContainer.className = 'grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8';
+                currentQuestion.options.forEach(option => {
+                    const button = createOptionButton(option, option);
+                    optionsContainer.appendChild(button);
+                });
+            } else if (currentQuestion.type === 'tf') {
+                optionsContainer.className = 'grid grid-cols-2 gap-4 mt-8';
+                const trueButton = createOptionButton('True', true);
+                const falseButton = createOptionButton('False', false);
+                optionsContainer.appendChild(trueButton);
+                optionsContainer.appendChild(falseButton);
+            }
+        }
+
+        /** إنشاء زر خيار */
+        function createOptionButton(text, value) {
+            const button = document.createElement('button');
+            button.textContent = text;
+            button.dataset.value = value; 
+            button.className = "bg-gray-700 p-4 rounded-lg text-left w-full transition-all duration-200 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white text-lg ltr:text-left rtl:text-right";
+            // تحديد اتجاه النص للخيارات (ltr للإنجليزية)
+            button.dir = "ltr"; 
+            if (text === 'True' || text === 'False') {
+                 button.classList.add("text-center");
+            }
+
+            button.addEventListener('click', () => selectAnswer(button));
+            return button;
+        }
+
+        /** معالجة اختيار الإجابة */
+        function selectAnswer(selectedButton) {
+            if (answerSelected) return; // منع الاختيار المتعدد
+            answerSelected = true;
+
+            const currentQuestion = allQuestions[currentQuestionIndex];
+            const selectedValue = selectedButton.dataset.value;
+            
+            const correctAnswer = currentQuestion.answer;
+            let isCorrect;
+
+            if (currentQuestion.type === 'tf') {
+                isCorrect = (selectedValue === String(correctAnswer));
+            } else {
+                isCorrect = (selectedValue === correctAnswer);
+            }
+
+            // تعطيل جميع الأزرار
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('opacity-70', 'cursor-not-allowed');
+            });
+
+            if (isCorrect) {
+                score++;
+                selectedButton.classList.add('correct');
+                feedbackEl.textContent = 'إجابة صحيحة!';
+                feedbackEl.className = 'text-center text-xl font-bold mt-6 min-h-[2rem] text-green-500';
+            } else {
+                selectedButton.classList.add('incorrect');
+                feedbackEl.textContent = 'إجابة خاطئة!';
+                feedbackEl.className = 'text-center text-xl font-bold mt-6 min-h-[2rem] text-red-500';
+
+                // إظهار الإجابة الصحيحة
+                const correctValue = String(correctAnswer);
+                // استخدام الاقتباسات في المحدد للتعامل مع القيم التي قد تحتوي على مسافات
+                const correctButton = optionsContainer.querySelector(`button[data-value="${correctValue.replace(/"/g, '\\"')}"]`);
+                if (correctButton) {
+                    correctButton.classList.add('correct');
+                }
+            }
+
+            // إظهار زر التالي
+            nextBtn.classList.remove('hidden');
+        }
+
+        /** الانتقال للسؤال التالي أو إظهار النتائج */
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < allQuestions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        /** إظهار شاشة النتائج النهائية */
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            scoreEl.textContent = `لقد حصلت على ${score} من ${allQuestions.length}`;
+        }
+
+        // --- 5. ربط الأحداث ---
+        nextBtn.addEventListener('click', nextQuestion);
+        restartBtn.addEventListener('click', startQuiz);
+
+        // --- 6. بدء الاختبار عند تحميل الصفحة ---
+        startQuiz();
+    </script>
+</body>
+</html>

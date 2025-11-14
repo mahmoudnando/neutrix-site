@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <title>قائمة الامتحانات</title>
+    <!-- تحميل Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* استخدام خط Inter للإنجليزية و Cairo للعربية */
+        body {
+            font-family: 'Inter', 'Cairo', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-gray-800 rounded-2xl shadow-2xl p-6 sm:p-10 w-full max-w-2xl">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl sm:text-4xl font-bold text-cyan-400">قائمة الامتحانات التفاعلية</h1>
+            <p class="text-lg text-gray-400 mt-3">اختر الامتحان الذي تريد البدء به.</p>
+        </header>
+
+        <!-- حاوية الروابط -->
+        <div class="space-y-6">
+            
+            <!-- رابط الامتحان الأول -->
+            <a href="quiz-app.html" 
+               class="block w-full bg-gray-700 p-6 rounded-lg text-white text-xl font-semibold text-center hover:bg-gray-600 transition-colors duration-300 shadow-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-75">
+                امتحان شبكات (Test Bank 1)
+            </a>
+
+            <!-- رابط الامتحان الثاني (من PDF) -->
+            <a href="quiz-app-pdf.html" 
+               class="block w-full bg-gray-700 p-6 rounded-lg text-white text-xl font-semibold text-center hover:bg-gray-600 transition-colors duration-300 shadow-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-75">
+                امتحان شبكات (بنك الأسئلة PDF)
+            </a>
+
+            <!-- يمكنك إضافة المزيد من الروابط هنا مستقبلاً -->
+            <!--
+            <a href="quiz-app-new.html" 
+               class="block w-full bg-gray-700 p-6 rounded-lg text-white text-xl font-semibold text-center hover:bg-gray-600 transition-colors duration-300 shadow-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-75">
+                امتحان جديد (مثال)
+            </a>
+            -->
+
+        </div>
+    </div>
+
+</body>
+</html>
