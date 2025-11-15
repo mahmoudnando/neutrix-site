@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بنك أسئلة أنظمة التشغيل (شامل)</title>
+    <!-- تحميل Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Cairo', sans-serif;
+        }
+        .correct {
+            background-color: #16a34a !important; /* bg-green-600 */
+            color: white !important;
+            border-color: #22c55e; /* border-green-500 */
+            border-width: 2px;
+        }
+        .incorrect {
+            background-color: #dc2626 !important; /* bg-red-600 */
+            color: white !important;
+            border-color: #ef4444; /* border-red-500 */
+            border-width: 2px;
+        }
+        .hidden {
+            display: none;
+        }
+        /* تنسيق للأسئلة التي تفتقد للبيانات */
+        .missing-data-note {
+            font-size: 0.9rem;
+            color: #f59e0b; /* text-amber-500 */
+            margin-top: 8px;
+            display: block;
+            font-style: italic;
+        }
+        /* تنسيق جداول البيانات */
+        .data-table th, .data-table td {
+            border: 1px solid #4b5563; /* border-gray-600 */
+            padding: 8px;
+            text-align: center;
+        }
+        .data-table th {
+            background-color: #374151; /* bg-gray-700 */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-gray-800 rounded-2xl shadow-2xl p-6 sm:p-10 w-full max-w-3xl">
+
+        <!-- حاوية الاختبار -->
+        <div id="quiz-container">
+            <header class="text-center mb-6">
+                <h1 class="text-3xl font-bold text-cyan-400">بنك أسئلة أنظمة التشغيل (شامل)</h1>
+                <p id="progress" class="text-lg text-gray-400 mt-2"></p>
+            </header>
+
+            <!-- حاوية جدول بيانات (لأسئلة 12-17) -->
+            <div id="job-table-1" class="hidden data-table-container mb-6 bg-gray-900 p-4 rounded-lg shadow-inner" dir="ltr">
+                <h3 class="text-lg font-semibold text-center text-cyan-400 mb-3">Process Data (Time 0 Arrival)</h3>
+                <table class="w-full text-sm text-white data-table">
+                    <thead>
+                        <tr>
+                            <th>Job</th>
+                            <th>Burst Time (ms)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Job A</td>
+                            <td>400</td>
+                        </tr>
+                        <tr>
+                            <td>Job B</td>
+                            <td>800</td>
+                        </tr>
+                        <tr>
+                            <td>Job C</td>
+                            <td>1200</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="text-xs text-center text-gray-400 mt-2">(Time Slice for RR = 400ms)</p>
+            </div>
+
+            <!-- حاوية جدول بيانات (لأسئلة 29-31) -->
+            <div id="page-ref-table-1" class="hidden data-table-container mb-6 bg-gray-900 p-4 rounded-lg shadow-inner" dir="ltr">
+                <h3 class="text-lg font-semibold text-center text-cyan-400 mb-3">Page Reference String</h3>
+                <div class="text-center text-lg font-mono p-3 bg-gray-800 rounded-md overflow-x-auto">
+                    1, 2, 3, 4, 2, 1, 5, 6, 2, 1, 2, 3, 7, 6, 3, 2, 1, 2, 3, 6
+                </div>
+                <p class="text-xs text-center text-gray-400 mt-2">(Page Frames = 4)</p>
+            </div>
+
+            <!-- حاوية جدول بيانات (لأسئلة 86-88) -->
+            <div id="job-table-2" class="hidden data-table-container mb-6 bg-gray-900 p-4 rounded-lg shadow-inner" dir="ltr">
+                <h3 class="text-lg font-semibold text-center text-cyan-400 mb-3">Process Data (Time 0 Arrival)</h3>
+                <table class="w-full text-sm text-white data-table">
+                    <thead>
+                        <tr>
+                            <th>Process</th>
+                            <th>Burst Time (ms)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>P1</td>
+                            <td>6</td>
+                        </tr>
+                        <tr>
+                            <td>P2</td>
+                            <td>8</td>
+                        </tr>
+                        <tr>
+                            <td>P3</td>
+                            <td>7</td>
+                        </tr>
+                        <tr>
+                            <td>P4</td>
+                            <td>3</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+
+            <!-- منطقة السؤال -->
+            <div class="bg-gray-900 p-6 rounded-lg shadow-inner min-h-[100px] flex items-center justify-center">
+                <h2 id="question" class="text-2xl font-semibold text-center leading-relaxed" dir="ltr"></h2>
+            </div>
+
+            <!-- منطقة الخيارات -->
+            <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+                <!-- سيتم ملء الخيارات هنا عبر جافاسكريبت -->
+            </div>
+
+            <!-- منطقة الإفادة (صحيح/خاطئ) -->
+            <div id="feedback" class="text-center text-xl font-bold mt-6 min-h-[2rem]">
+                <!-- سيتم عرض الإفادة هنا -->
+            </div>
+
+            <!-- زر التالي -->
+            <button id="next-btn" class="hidden bg-cyan-600 text-white font-bold py-3 px-8 rounded-lg mt-8 w-full hover:bg-cyan-700 transition-colors duration-300 shadow-lg text-lg">
+                التالي
+            </button>
+        </div>
+
+        <!-- حاوية النتائج (مخفية افتراضيًا) -->
+        <div id="results-container" class="hidden text-center">
+            <h2 class="text-4xl font-bold text-cyan-400 mb-4">اكتمل الاختبار!</h2>
+            <p id="score" class="text-3xl text-white mb-8"></p>
+            <button id="restart-btn" class="bg-gray-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-700 transition-colors duration-300 shadow-lg text-lg">
+                إعادة الاختبار
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. تعريف الأسئلة (بنك الأسئلة الكامل) ---
+        const allQuestions = [
+            { question: "Dual mode of operating system has", type: 'mcq', options: ['1 mode', '2 modes', '3 modes', '4 modes'], answer: '2 modes' },
+            { question: "Virtual memory is", type: 'mcq', options: ['an extremely large main memory', 'an extremely large secondary memory', 'an illusion of an extremely large memory', 'a type of memory used in super computers'], answer: 'an illusion of an extremely large memory' },
+            { question: "Page fault occurs when", type: 'mcq', options: ['the page is corrupted by application software', 'the page is in main memory', 'the page is not in main memory', 'one tries to divide a number by 0'], answer: 'the page is not in main memory' },
+            { question: "Concurrent processes are processes that", type: 'mcq', options: ['do not overlap in time', 'overlap in time', 'are executed by a processor at the same time', 'none of the above'], answer: 'overlap in time' },
+            { question: "The page replacement policy that sometimes leads to more page faults when the size of the memory is increased is", type: 'mcq', options: ['FIFO', 'LRU', 'SJF', 'none of the above'], answer: 'FIFO' },
+            { question: "Dijkstra's banking algorithm solves the problem of", type: 'mcq', options: ['deadlock avoidance', 'deadlock recovery', 'mutual exclusion', 'context switching'], answer: 'deadlock avoidance' },
+            { question: "In paged memory systems, if the page size is increased, then the internal fragmentation generally", type: 'mcq', options: ['becomes less', 'becomes more', 'remains constant', 'none of the above'], answer: 'becomes more' },
+            { question: "Critical region is", type: 'mcq', options: ['a part of the operating system which is not allowed to be accessed by any process', 'a set of instructions that access common shared resource which exclude one another in time', 'the portion of the main memory which can be accessed only by one process at a time', 'none of the above'], answer: 'a set of instructions that access common shared resource which exclude one another in time' },
+            { question: "Necessary conditions for deadlock are", type: 'mcq', options: ['non-preemption and circular wait', 'Mutual exclusion', 'both (a) and (b)', 'none of the above'], answer: 'both (a) and (b)' },
+            { question: "Pre-emptive scheduling, is the strategy of temporarily suspending a running process", type: 'mcq', options: ['before the CPU time slice expires', 'to allow starving processes to run', 'when it requests I/O', 'none of the above'], answer: 'to allow starving processes to run' },
+            { question: "The first-fit, best-fit, and the worst-fit algorithm can be used for", type: 'mcq', options: ['contiguous allocation of memory', 'linked allocation of memory', 'indexed allocation of memory', 'all of the above'], answer: 'contiguous allocation of memory' },
+            // --- أسئلة الجدول الأول ---
+            { question: "Given a RR scheduler, what is the turnaround time of job B?", type: 'mcq', options: ['400 ms', '800 ms', '1200 ms', '1600 ms'], answer: '1600 ms', tableId: 'job-table-1' },
+            { question: "Given a FIFO scheduler, what is the average response time of the three jobs?", type: 'mcq', options: ['400 ms', '533.33 ms', '1333.33 ms', '1600 ms'], answer: '533.33 ms', tableId: 'job-table-1' },
+            { question: "Given a RR scheduler, what is the average response time of the three jobs?", type: 'mcq', options: ['400 ms', '533.33 ms', '1333.33 ms', '1600 ms'], answer: '400 ms', tableId: 'job-table-1' },
+            { question: "Given a RR scheduler, what is the waiting time of job B?", type: 'mcq', options: ['400 ms', '800 ms', '1200 ms', '2400 ms'], answer: '800 ms', tableId: 'job-table-1' },
+            { question: "Given a RR scheduler, what is the waiting time of job C?", type: 'mcq', options: ['400 ms', '800 ms', '1200 ms', '2400 ms'], answer: '1200 ms', tableId: 'job-table-1' },
+            { question: "Given a FIFO scheduler, what is the waiting time of job C?", type: 'mcq', options: ['400 ms', '800 ms', '1200 ms', '2400 ms'], answer: '1200 ms', tableId: 'job-table-1' },
+            // --- نهاية أسئلة الجدول الأول ---
+            { question: "Which of the following scheduling algorithms gives minimum average waiting time?", type: 'mcq', options: ['FCFS', 'SJF', 'Round-robin', 'Priorty'], answer: 'SJF' },
+            { question: "Which of the following scheduling policy is well suited for a time-shared operating system?", type: 'mcq', options: ['Shortest job first', 'Round robin', 'FCFS', 'Elevator'], answer: 'Round robin' },
+            { question: "If a physical address is 32 bits and each page is 8KB, the top ... bits exactly designate the physical page number.", type: 'mcq', options: ['10', '13', '19', '32'], answer: '19' },
+            { question: "The ... occurs when high priority jobs must wait for lower priority jobs.", type: 'mcq', options: ['convoy effect', 'BLOCKED state', 'critical-section problem', 'race condition'], answer: 'convoy effect' }, // Note: This is debatable, could also be priority inversion. Convoy effect is FCFS specific.
+            { question: "A situation where several processes access and manipulate the same data concurrently... depends on the particular order... is called a", type: 'mcq', options: ['convoy effect', 'disorder problem', 'critical-section problem', 'race condition'], answer: 'race condition' },
+            { question: "Base register: 0x37d (893), Bounds register: 506. Translate virtual address 0x2e7 (743).", type: 'mcq', options: ['0x2e7 (743)', '0x577 (1399)', '0x664 (1636)', 'Segmentation Violation'], answer: 'Segmentation Violation' },
+            { question: "Base register: 0x37d (893), Bounds register: 506. Translate virtual address 0x01ef (495).", type: 'mcq', options: ['0x01ef (495)', '0x3E9 (1001)', '0x56C (1388)', 'Segmentation Violation'], answer: '0x56C (1388)' },
+            { question: "In a time-sharing operating system, when the time slot given to a process is completed, the process goes from the RUNNING state to the", type: 'mcq', options: ['BLOCKED state', 'READY state', 'SUSPENDED state', 'TERMINATED state'], answer: 'READY state' },
+            { question: "Suppose that a process is in \"BLOCKED\" state waiting for some I/O service. When the device is completed, it goes to the", type: 'mcq', options: ['BLOCKED state', 'READY state', 'SUSPENDED state', 'TERMINATED state'], answer: 'READY state' },
+            { question: "The running process issues an I/O request to the disk. The process goes to the", type: 'mcq', options: ['BLOCKED state', 'READY state', 'SUSPENDED state', 'TERMINATED state'], answer: 'BLOCKED state' },
+            { question: "The running process completes. The process goes to the", type: 'mcq', options: ['BLOCKED state', 'READY state', 'SUSPENDED state', 'TERMINATED state'], answer: 'TERMINATED state' },
+            // --- أسئلة الجدول الثاني ---
+            { question: "How many page faults using FIFO algorithm?", type: 'mcq', options: ['8', '10', '12', '14'], answer: '14', tableId: 'page-ref-table-1' },
+            { question: "How many page faults using least-recently-used (LRU) algorithm?", type: 'mcq', options: ['8', '10', '12', '14'], answer: '12', tableId: 'page-ref-table-1' },
+            { question: "How many page faults using optimal page replacement algorithm?", type: 'mcq', options: ['8', '10', '12', '14'], answer: '8', tableId: 'page-ref-table-1' },
+            // --- نهاية أسئلة الجدول الثاني ---
+            { question: "'Aging' is", type: 'mcq', options: ['keeping track of cache contents', 'keeping track of what pages are currently residing in the memory', 'keeping track of how many times a given page is referenced', 'increasing the priority of jobs to ensure termination in a finite time.'], answer: 'increasing the priority of jobs to ensure termination in a finite time.' },
+            { question: "If there are 32 pages, each of size 1 Kbytes, then the logical address should have", type: 'mcq', options: ['10 bits', '14 bits', '15 bits', '16 bits'], answer: '15 bits' },
+            { question: "Memory protection is normally done by the", type: 'mcq', options: ['processor and the associated hardware', 'operating system', 'compiler', 'user program'], answer: 'processor and the associated hardware' },
+            { question: "Which of the following page replacement algorithms suffers from Belady's anomaly?", type: 'mcq', options: ['Optimal', 'Least-Recently-Used (LRU)', 'FIFO', 'Best'], answer: 'FIFO' },
+            { question: "Thrashing", type: 'mcq', options: ['reduces page I/O', 'decreases the degree of multiprogramming', 'implies excessive page I/O', 'improves the system performance'], answer: 'implies excessive page I/O' },
+            { question: "Deadlock may occur", type: 'mcq', options: ['if there are more than two processes competing for resource R1', 'if process P1 is holding resource R1, and process P2 is holding resource R2', 'if process P1 is holding resources R1 and R2, and process P2 is waiting for resources R1 and R2', 'if process PI is holding a resource R2 and is waiting for resource R1 and process P2 is holding a resource R1 and is waiting for a resource R2'], answer: 'if process PI is holding a resource R2 and is waiting for resource R1 and process P2 is holding a resource R1 and is waiting for a resource R2' },
+            { question: "Mutual exclusion problem occurs:", type: 'mcq', options: ['between two disjoint processes that do not interact', 'among processes that share resources', 'among processes that do not use the same resource', 'among threads that do not use the same resource'], answer: 'among processes that share resources' },
+            { question: "An operating system contains 3 user processes each requiring 2 units of resource R. The minimum number of units of R such that no deadlock will ever occur is", type: 'mcq', options: ['3', '4', '5', '6'], answer: '4' },
+            { question: "Why are page sizes powers of 2?", type: 'mcq', options: ['The page number is determined by the n most significant bits...', 'It doesn\'t have to be but manufacturers only make memory in those sizes.', 'The displacement within the page is determined by the n least significant bits of the virtual address. So the page size is 2^n.', 'Pages need to be repeatedly able to be halved.'], answer: 'The displacement within the page is determined by the n least significant bits of the virtual address. So the page size is 2^n.' },
+            { question: "If the virtual address space has a 9-bit with 3 bits of segment number and 6 bits of offset. How large are segments on this architecture?", type: 'mcq', options: ['64 bytes', '256 bytes', '512 bytes', '2048 bytes'], answer: '64 bytes' },
+            { question: "The text segment of a process address space contains:", type: 'mcq', options: ['the statically allocated data associated with the process', 'the dynamically allocated data associated with the process', 'the executable code associated with the process', 'the inter-process communication (IPC) messages for the process'], answer: 'the executable code associated with the process' },
+            { question: "In the Banker's algorithm, the content of the matrix Need is", type: 'mcq', options: ['Allocation - Available', 'Max - Available', 'Max - Allocation', 'Allocation - Max'], answer: 'Max - Allocation' },
+            { question: "What hardware mechanism is required in order to make virtual memory systems efficient?", type: 'mcq', options: ['DMA', 'TLB', 'EROM', 'EEROM'], answer: 'TLB' },
+            { question: "In a page memory, the page hit ratio is 0.9. Page access time: secondary=100ns, primary=10ns. The average time required to access a page is", type: 'mcq', options: ['9 ns', '10 ns', '19 ns', '90 ns'], answer: '19 ns' },
+            { question: "One example of a hardware solution to the critical section problem is:", type: 'mcq', options: ['Peterson\'s Algorithm', 'Banker\'s Algorithm', 'Test and Set', 'Compare and Shop'], answer: 'Test and Set' },
+            { question: "Kernal mode of the operating system is also called", type: 'mcq', options: ['User mode', 'System mode', 'Supervisor mode', 'Data mode'], answer: 'Supervisor mode' },
+            { question: "Table of pointers for interrupt to be executed contains the", type: 'mcq', options: ['interrupts', 'programs', 'addresses', 'compilers'], answer: 'addresses' },
+            { question: "To avoid the race condition, the number of processes that may be simultaneously inside their critical section is", type: 'mcq', options: ['0', '1', '2', '4'], answer: '1' },
+            { question: "Process is", type: 'mcq', options: ['program in High level language kept on disk', 'contents of main memory', 'a program in execution', 'a job in secondary memory'], answer: 'a program in execution' },
+            { question: "What is operating system?", type: 'mcq', options: ['collection of programs that manages hardware resources', 'system service provider to the application programs', 'link to interface the hardware and application programs', 'all of the mentioned'], answer: 'all of the mentioned' },
+            { question: "To access the services of operating system, the interface is provided by the", type: 'mcq', options: ['System calls', 'API', 'Library', 'Assembly instruction'], answer: 'System calls' },
+            { question: "What is the ready state of a process?", type: 'mcq', options: ['when process is scheduled to run after some execution', 'when process is unable to run until some task has been completed', 'when process is using the CPU', 'none of the mentioned'], answer: 'when process is scheduled to run after some execution' }, // 'a' is closer than 'd'
+            { question: "What is interprocess communication?", type: 'mcq', options: ['communication within the process', 'communication between two process', 'communication between two threads of same process', 'none of the mentioned'], answer: 'communication between two process' },
+            { question: "A set of processes is deadlock if", type: 'mcq', options: ['each process is blocked and will remain so forever', 'each process is terminated', 'all processes are trying to kill each other', 'none of the mentioned'], answer: 'each process is blocked and will remain so forever' },
+            { question: "The number of processes completed per unit time is known as", type: 'mcq', options: ['Output', 'Throughput', 'Efficiency', 'Capacity'], answer: 'Throughput' },
+            { question: "Which of the following is not the state of a process?", type: 'mcq', options: ['New', 'Old', 'Waiting', 'Running'], answer: 'Old' },
+            { question: "What is the degree of multiprogramming?", type: 'mcq', options: ['the number of processes executed per unit time', 'the number of processes in the ready queue', 'the number of processes in the I/O queue', 'the number of processes in memory'], answer: 'the number of processes in memory' },
+            { question: "What is a long-term scheduler?", type: 'mcq', options: ['It selects which process has to be brought into the ready queue', 'It selects which process has to be executed next and allocates CPU', 'It selects which process to remove from memory by swapping', 'None of the mentioned'], answer: 'It selects which process has to be brought into the ready queue' },
+            { question: "If all processes I/O bound, the ready queue will almost always be ... and the Short term Scheduler will have a ... to do.", type: 'mcq', options: ['full, little', 'full, lot', 'empty, little', 'empty, lot'], answer: 'empty, little' },
+            { question: "What is a short-term scheduler?", type: 'mcq', options: ['It selects which process has to be brought into the ready queue', 'It selects which process has to be executed next and allocates CPU', 'It selects which process to remove from memory by swapping', 'None of the mentioned'], answer: 'It selects which process has to be executed next and allocates CPU' },
+            { question: "The context of a process in the PCB of a process does not contain", type: 'mcq', options: ['the value of the CPU registers', 'the process state', 'memory-management information', 'context switch time'], answer: 'context switch time' },
+            { question: "When several processes access the same data concurrently and the outcome of the execution depends on the particular order in which the access takes place, is called?", type: 'mcq', options: ['dynamic condition', 'race condition', 'essential condition', 'critical condition'], answer: 'race condition' },
+            { question: "If a process is executing in its critical section, then no other processes can be executing in their critical section. This condition is called?", type: 'mcq', options: ['mutual exclusion', 'critical exclusion', 'synchronous exclusion', 'asynchronous exclusion'], answer: 'mutual exclusion' },
+            { question: "Which one of the following is a synchronization tool?", type: 'mcq', options: ['Thread', 'Pipe', 'Semaphore', 'socket'], answer: 'Semaphore' },
+            { question: "When high priority task is indirectly preempted by medium priority task... the scenario is called", type: 'mcq', options: ['priority inversion', 'priority removal', 'priority exchange', 'priority modification'], answer: 'priority inversion' },
+            { question: "What is Inter process communication?", type: 'mcq', options: ['allows processes to communicate and synchronize their actions when using the same address space', 'allows processes to communicate and synchronize their actions without using the same address space', 'allows the processes to only synchronize their actions without communication', 'none of the mentioned'], answer: 'allows processes to communicate and synchronize their actions without using the same address space' },
+            { question: "DMA is used for", type: 'mcq', options: ['High speed devices(disks and communications network)', 'Low speed devices', 'Utilizing CPU cycles', 'All of the mentioned'], answer: 'High speed devices(disks and communications network)' },
+            { question: "In an interrupt driven input/output", type: 'mcq', options: ['the CPU uses polling to watch the control bit constantly...', 'the CPU writes one data byte to the data register and sets a bit in control register...', 'the CPU receives an interrupt when the device is ready for the next byte', 'the CPU runs a user written code and does accordingly'], answer: 'the CPU receives an interrupt when the device is ready for the next byte' },
+            { question: "The interval from the time of submission of a process to the time of completion is termed as", type: 'mcq', options: ['waiting time', 'turnaround time', 'response time', 'throughput'], answer: 'turnaround time' },
+            { question: "A process is selected from the ... queue by the ... scheduler, to be executed.", type: 'mcq', options: ['blocked, short term', 'wait, long term', 'ready, short term', 'ready, long term'], answer: 'ready, short term' },
+            { question: "What is Response time?", type: 'mcq', options: ['the total time taken from the submission time till the completion time', 'the total time taken from the submission time till the first response is produced', 'the total time taken from submission time till the response is output', 'none of the mentioned'], answer: 'the total time taken from the submission time till the first response is produced' },
+            { question: "With round robin scheduling algorithm in a time shared system", type: 'mcq', options: ['using very large time slices converts it into First come First served scheduling algorithm', 'using very small time slices converts it into First come First served scheduling algorithm', 'using extremely small time slices increases performance', 'using very small time slices converts it into Shortest Job First algorithm'], answer: 'using very large time slices converts it into First come First served scheduling algorithm' },
+            { question: "The real difficulty with Shortest Job First (SJF) in short term scheduling is", type: 'mcq', options: ['it is too good an algorithm', 'knowing the length of the next CPU request', 'it is too complex to understand', 'none of the mentioned'], answer: 'knowing the length of the next CPU request' },
+            { question: "What is 'Aging'?", type: 'mcq', options: ['keeping track of cache contents', 'keeping track of what pages are currently residing in memory', 'keeping track of how many times a given page is referenced', 'increasing the priority of jobs to ensure termination in a finite time'], answer: 'increasing the priority of jobs to ensure termination in a finite time' },
+            { question: "Choose one of the disadvantages of the priority scheduling algorithm?", type: 'mcq', options: ['it schedules in a very complex manner', 'its scheduling takes up a lot of time', 'it can lead to some low priority process waiting indefinitely for the CPU', 'none of the mentioned'], answer: 'it can lead to some low priority process waiting indefinitely for the CPU' },
+            { question: "Which of the following scheduling algorithms gives minimum average waiting time?", type: 'mcq', options: ['FCFS', 'SJF', 'Roundrobin', 'Priority'], answer: 'SJF' },
+            { question: "The segment of code in which the process may change common variables, update tables, write into files is known as", type: 'mcq', options: ['Program', 'critical section', 'non critical section', 'synchronizing'], answer: 'critical section' },
+            { question: "Which of the following conditions must be satisfied to solve the critical section problem?", type: 'mcq', options: ['Mutual Exclusion', 'Progress', 'Bounded Waiting', 'All of the mentioned'], answer: 'All of the mentioned' },
+            { question: "TestAndSet instruction is executed", type: 'mcq', options: ['after a particular process', 'periodically', 'atomically', 'none of the mentioned'], answer: 'atomically' },
+            { question: "The bounded buffer problem is also known as", type: 'mcq', options: ['Readers - Writers problem', 'Dining-Philosophers problem', 'Producer - Consumer problem', 'None of the mentioned'], answer: 'Producer - Consumer problem' },
+            { question: "The dining - philosophers problem will occur in case of", type: 'mcq', options: ['5 philosophers and 5 chopsticks', '4 philosophers and 5 chopsticks', '3 philosophers and 5 chopsticks', '6 philosophers and 5 chopsticks'], answer: '5 philosophers and 5 chopsticks' },
+            { question: "Which of the following condition is required for a deadlock to be possible?", type: 'mcq', options: ['mutual exclusion', 'a process may hold allocated resources while awaiting assignment of other resources', 'no resource can be forcibly removed from a process holding it', 'all of the mentioned'], answer: 'all of the mentioned' },
+            { question: "The circular wait condition can be prevented by", type: 'mcq', options: ['defining a linear ordering of resource types', 'using thread', 'using pipes', 'all of the mentioned'], answer: 'defining a linear ordering of resource types' },
+            { question: "Which one of the following is the deadlock avoidance algorithm?", type: 'mcq', options: ['banker\'s algorithm', 'round-robin algorithm', 'elevator algorithm', 'karn\'s algorithm'], answer: 'banker\'s algorithm' },
+            // --- أسئلة الجدول الثالث ---
+            { question: "Assuming the above process being scheduled with the SJF scheduling algorithm. The waiting time for process P1 is:", type: 'mcq', options: ['3ms', '0ms', '16ms', '9ms'], answer: '9ms', tableId: 'job-table-2' },
+            { question: "Assuming the above process being scheduled with the SJF scheduling algorithm. The average waiting time is:", type: 'mcq', options: ['6ms', '6.5ms', '7ms', '7.5ms'], answer: '7ms', tableId: 'job-table-2' },
+            { question: "Assuming the above process being scheduled with the SJF scheduling algorithm. The average turnaround time is:", type: 'mcq', options: ['13 ms', '13.5ms', '14 ms', '14.5ms'], answer: '13.5ms', tableId: 'job-table-2' },
+            // --- نهاية أسئلة الجدول الثالث ---
+        ];
+        // ملاحظة: تم حذف السؤال 89 لأنه سؤال مقالي وليس اختيار من متعدد
+
+        // --- 2. الإشارة إلى عناصر الصفحة ---
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+        const questionEl = document.getElementById('question');
+        const optionsContainer = document.getElementById('options-container');
+        const progressEl = document.getElementById('progress');
+        const feedbackEl = document.getElementById('feedback');
+        const nextBtn = document.getElementById('next-btn');
+        const scoreEl = document.getElementById('score');
+        const restartBtn = document.getElementById('restart-btn');
+        // الإشارة إلى حاويات الجداول
+        const tableContainers = document.querySelectorAll('.data-table-container');
+
+        // --- 3. متغيرات حالة الاختبار ---
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answerSelected = false;
+
+        // --- 4. وظائف الاختبار ---
+
+        /** بدء الاختبار أو إعادة تشغيله */
+        function startQuiz() {
+            // تم إلغاء خلط الأسئلة بناءً على طلبك
+             // allQuestions.sort(() => Math.random() - 0.5);
+            currentQuestionIndex = 0;
+            score = 0;
+            answerSelected = false;
+            resultsContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            nextBtn.classList.add('hidden');
+            loadQuestion();
+        }
+
+        /** تحميل السؤال الحالي */
+        function loadQuestion() {
+            answerSelected = false; 
+            feedbackEl.textContent = ''; 
+            nextBtn.classList.add('hidden'); 
+            optionsContainer.innerHTML = ''; 
+            
+            // إخفاء جميع حاويات الجداول
+            tableContainers.forEach(container => container.classList.add('hidden'));
+
+            const currentQuestion = allQuestions[currentQuestionIndex];
+
+            // إظهار الجدول المخصص للسؤال (إن وجد)
+            if (currentQuestion.tableId) {
+                const tableToShow = document.getElementById(currentQuestion.tableId);
+                if (tableToShow) {
+                    tableToShow.classList.remove('hidden');
+                }
+            }
+            
+            progressEl.textContent = `السؤال ${currentQuestionIndex + 1} من ${allQuestions.length}`;
+            questionEl.innerHTML = currentQuestion.question; 
+            questionEl.dir = "ltr";
+            
+            // إنشاء أزرار الخيارات
+            optionsContainer.className = 'grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8';
+            currentQuestion.options.forEach(option => {
+                const button = createOptionButton(option, option);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        /** إنشاء زر خيار */
+        function createOptionButton(text, value) {
+            const button = document.createElement('button');
+            button.textContent = text;
+            button.dataset.value = value; 
+            button.className = "bg-gray-700 p-4 rounded-lg text-left w-full transition-all duration-200 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white text-lg ltr:text-left rtl:text-right";
+            button.dir = "ltr"; 
+            if (text === 'True' || text === 'False' || text === 'Yes' || text === 'No' || !isNaN(text) || text.includes('ms')) { // تمييز الأرقام والوقت
+                 button.classList.add("text-center");
+            }
+
+            button.addEventListener('click', () => selectAnswer(button));
+            return button;
+        }
+
+        /** معالجة اختيار الإجابة */
+        function selectAnswer(selectedButton) {
+            if (answerSelected) return; 
+            answerSelected = true;
+
+            const currentQuestion = allQuestions[currentQuestionIndex];
+            const selectedValue = selectedButton.dataset.value;
+            
+            const correctAnswer = currentQuestion.answer;
+            let isCorrect = (selectedValue === correctAnswer);
+
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('opacity-70', 'cursor-not-allowed');
+            });
+
+            if (isCorrect) {
+                score++;
+                selectedButton.classList.add('correct');
+                feedbackEl.textContent = 'إجابة صحيحة!';
+                feedbackEl.className = 'text-center text-xl font-bold mt-6 min-h-[2rem] text-green-500';
+            } else {
+                selectedButton.classList.add('incorrect');
+                feedbackEl.textContent = 'إجابة خاطئة!';
+                feedbackEl.className = 'text-center text-xl font-bold mt-6 min-h-[2rem] text-red-500';
+
+                const correctValue = String(correctAnswer);
+                const correctButton = Array.from(optionsContainer.children).find(btn => btn.dataset.value === correctValue);
+                if (correctButton) {
+                    correctButton.classList.add('correct');
+                }
+            }
+
+            nextBtn.classList.remove('hidden');
+        }
+
+        /** الانتقال للسؤال التالي أو إظهار النتائج */
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < allQuestions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        /** إظهار شاشة النتائج النهائية */
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            scoreEl.textContent = `لقد حصلت على ${score} من ${allQuestions.length}`;
+        }
+
+        // --- 5. ربط الأحداث ---
+        nextBtn.addEventListener('click', nextQuestion);
+        restartBtn.addEventListener('click', startQuiz);
+
+        // --- 6. بدء الاختبار عند تحميل الصفحة ---
+        startQuiz();
+    </script>
+</body>
+</html>

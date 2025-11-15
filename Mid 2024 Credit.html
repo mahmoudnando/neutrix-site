@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>امتحان أنظمة التشغيل (Mid 2024 Credit)</title>
+    <!-- تحميل Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Cairo', sans-serif;
+        }
+        .correct {
+            background-color: #16a34a !important; /* bg-green-600 */
+            color: white !important;
+            border-color: #22c55e; /* border-green-500 */
+            border-width: 2px;
+        }
+        .incorrect {
+            background-color: #dc2626 !important; /* bg-red-600 */
+            color: white !important;
+            border-color: #ef4444; /* border-red-500 */
+            border-width: 2px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-gray-800 rounded-2xl shadow-2xl p-6 sm:p-10 w-full max-w-3xl">
+
+        <!-- حاوية الاختبار -->
+        <div id="quiz-container">
+            <header class="text-center mb-6">
+                <h1 class="text-3xl font-bold text-cyan-400">امتحان أنظمة التشغيل (Mid 2024 Credit)</h1>
+                <p id="progress" class="text-lg text-gray-400 mt-2"></p>
+            </header>
+
+            <!-- منطقة السؤال -->
+            <div class="bg-gray-900 p-6 rounded-lg shadow-inner min-h-[100px] flex items-center justify-center">
+                <h2 id="question" class="text-2xl font-semibold text-center leading-relaxed" dir="ltr"></h2>
+            </div>
+
+            <!-- منطقة الخيارات -->
+            <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+                <!-- سيتم ملء الخيارات هنا عبر جافاسكريبت -->
+            </div>
+
+            <!-- منطقة الإفادة (صحيح/خاطئ) -->
+            <div id="feedback" class="text-center text-xl font-bold mt-6 min-h-[2rem]">
+                <!-- سيتم عرض الإفادة هنا -->
+            </div>
+
+            <!-- زر التالي -->
+            <button id="next-btn" class="hidden bg-cyan-600 text-white font-bold py-3 px-8 rounded-lg mt-8 w-full hover:bg-cyan-700 transition-colors duration-300 shadow-lg text-lg">
+                التالي
+            </button>
+        </div>
+
+        <!-- حاوية النتائج (مخفية افتراضيًا) -->
+        <div id="results-container" class="hidden text-center">
+            <h2 class="text-4xl font-bold text-cyan-400 mb-4">اكتمل الاختبار!</h2>
+            <p id="score" class="text-3xl text-white mb-8"></p>
+            <button id="restart-btn" class="bg-gray-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-700 transition-colors duration-300 shadow-lg text-lg">
+                إعادة الاختبار
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. تعريف الأسئلة (من ملف PDF الخاص بـ Mid 2024 Credit) ---
+        const allQuestions = [
+            { question: "Which of the following is NOT a state of a process in the five-state model?", type: 'mcq', options: ['Running', 'Terminated', 'New', 'Idle', 'Waiting'], answer: 'Idle' },
+            { question: "What is the primary purpose of a Mutex in a multithreaded environment?", type: 'mcq', options: ['To ensure mutual exclusion for accessing shared resources.', 'To prioritize thread execution based on importance.', 'To manage memory allocation for threads.', 'To synchronize the execution of all threads.'], answer: 'To ensure mutual exclusion for accessing shared resources.' },
+            { question: "Compared to mutexes, semaphores offer which additional capability?", type: 'mcq', options: ['Faster synchronization', 'More complex implementation', 'Ability to control access to a limited number of resources', 'None of the above'], answer: 'Ability to control access to a limited number of resources' },
+            { question: "Semaphores are used for:", type: 'mcq', options: ['Memory management', 'Process scheduling', 'Deadlock prevention', 'Process synchronization'], answer: 'Process synchronization' },
+            { question: "Which of the following hardware instructions is commonly used to implement critical sections in a multiprocessor system?", type: 'mcq', options: ['TestAndSet', 'Load', 'Move', 'Add'], answer: 'TestAndSet' },
+            { question: "DMA transfers are most beneficial for:", type: 'mcq', options: ['Frequent, small data exchanges between CPU and devices.', 'Large, bulk data transfers between devices and memory.', 'Real-time applications requiring minimal latency.', 'All of the above.'], answer: 'Real-time applications requiring minimal latency.' },
+            { question: "What is a key characteristic of a race condition?", type: 'mcq', options: ['The outcome of program execution depends solely on the order of instructions within a single process.', 'The operating system runs out of memory during program execution.', 'Multiple processes compete for access to a shared resource without proper synchronization.', 'An infinite loop occurs within a single process.'], answer: 'Multiple processes compete for access to a shared resource without proper synchronization.' },
+            { question: "What is a short-term scheduler?", type: 'mcq', options: ['It selects which process must be brought into the ready queue', 'It selects which process must be executed next and allocates CPU', 'It selects which process must be removed from memory by swapping', 'None of the mentioned'], answer: 'It selects which process must be executed next and allocates CPU' },
+            { question: "When a program needs to perform a privileged operation like reading a file, it switches from which mode to which mode?", type: 'mcq', options: ['Application Mode to System Mode', 'Guest Mode to Host Mode', 'User Mode to Kernel Mode', 'Kernel Mode to User Mode'], answer: 'User Mode to Kernel Mode' },
+            { question: "What is the primary cause of priority inversion in a multitasking system?", type: 'mcq', options: ['Insufficient memory allocation', 'Interrupt latency exceeding a specific threshold', 'A high-priority process waiting on a resource held by a lower-priority process', 'Deadlock between processes'], answer: 'A high-priority process waiting on a resource held by a lower-priority process' },
+            { question: "What is the disadvantage of using busy waiting in a solution to the critical-section problem?", type: 'mcq', options: ['It requires complex data structures for managing process states.', 'It wastes CPU cycles while a process waits to enter its critical section.', 'It guarantees mutual exclusion for accessing shared resources.', 'It is prone to deadlocks.'], answer: 'It wastes CPU cycles while a process waits to enter its critical section.' },
+            { question: "What is the primary purpose of an interrupt?", type: 'mcq', options: ['To terminate a running program', 'To signal the CPU about an event requiring attention', 'To perform a system call', 'To allocate memory for a new process'], answer: 'To signal the CPU about an event requiring attention' },
+            { question: "The primary function of a scheduler is to:", type: 'mcq', options: ['Manage the creation and deletion of processes', 'Determine which process gets the CPU next', 'Manage I/O devices', 'Allocate memory to processes'], answer: 'Determine which process gets the CPU next' },
+            { question: "What happens when threadA tries to acquire a Mutex that is already locked by threadB?", type: 'mcq', options: ['The threadB is immediately terminated.', 'The operating system throws an error and the program crashes.', 'The threadA is blocked until the threadB releases the Mutex.', 'The threadA preempts the threadB and acquires the Mutex.'], answer: 'The threadA is blocked until the threadB releases the Mutex.' },
+            { question: "Which mode has full access to system resources like memory and devices?", type: 'mcq', options: ['Application Mode', 'User Mode', 'Kernel Mode', 'Guest Mode'], answer: 'Kernel Mode' },
+            { question: "What is the primary purpose of synchronization mechanisms in an operating system?", type: 'mcq', options: ['To handle device interrupts and manage I/O operations.', 'To prevent race conditions and ensure data consistency when multiple processes access shared resources.', 'To prioritize processes based on their importance.', 'To allocate memory efficiently to running processes.'], answer: 'To prevent race conditions and ensure data consistency when multiple processes access shared resources.' },
+            { question: "How does DMA differ from programmed I/O?", type: 'mcq', options: ['DMA is slower than programmed I/O.', 'DMA transfers data in smaller chunks.', 'DMA utilizes the system bus without CPU intervention.', 'DMA involves direct interaction between the CPU and device.'], answer: 'DMA involves direct interaction between the CPU and device.' },
+            { question: "The degree of multiprogramming refers to:", type: 'mcq', options: ['The speed at which the CPU can switch between programs.', 'The number of processes that can reside in memory at the same time.', 'The number of I/O devices available in the system.', 'The number of users that can access the system simultaneously.'], answer: 'The number of processes that can reside in memory at the same time.' },
+            { question: "Which of the following operations is performed on a semaphore?", type: 'mcq', options: ['Read', 'Write', 'P (wait) and V (signal)', 'All of the above'], answer: 'P (wait) and V (signal)' },
+            { question: "What happens when a DMA transfer is complete?", type: 'mcq', options: ['The operating system takes over control of the data transfer.', 'The CPU automatically initiates a new transfer without notification.', 'The DMA controller generates an interrupt to inform the CPU.', 'The DMA controller shuts down and requires manual restart.'], answer: 'The DMA controller generates an interrupt to inform the CPU.' }
+        ];
+
+
+        // --- 2. الإشارة إلى عناصر الصفحة ---
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+        const questionEl = document.getElementById('question');
+        const optionsContainer = document.getElementById('options-container');
+        const progressEl = document.getElementById('progress');
+        const feedbackEl = document.getElementById('feedback');
+        const nextBtn = document.getElementById('next-btn');
+        const scoreEl = document.getElementById('score');
+        const restartBtn = document.getElementById('restart-btn');
+
+        // --- 3. متغيرات حالة الاختبار ---
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answerSelected = false;
+
+        // --- 4. وظائف الاختبار ---
+
+        /** بدء الاختبار أو إعادة تشغيله */
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            answerSelected = false;
+            resultsContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            nextBtn.classList.add('hidden');
+            loadQuestion();
+        }
+
+        /** تحميل السؤال الحالي */
+        function loadQuestion() {
+            answerSelected = false; 
+            feedbackEl.textContent = ''; 
+            nextBtn.classList.add('hidden'); 
+            optionsContainer.innerHTML = ''; 
+
+            const currentQuestion = allQuestions[currentQuestionIndex];
+            
+            progressEl.textContent = `السؤال ${currentQuestionIndex + 1} من ${allQuestions.length}`;
+            questionEl.textContent = currentQuestion.question;
+            questionEl.dir = "ltr";
+            
+            // إنشاء أزرار الخيارات
+            optionsContainer.className = 'grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8';
+            currentQuestion.options.forEach(option => {
+                const button = createOptionButton(option, option);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        /** إنشاء زر خيار */
+        function createOptionButton(text, value) {
+            const button = document.createElement('button');
+            button.textContent = text;
+            button.dataset.value = value; 
+            button.className = "bg-gray-700 p-4 rounded-lg text-left w-full transition-all duration-200 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white text-lg ltr:text-left rtl:text-right";
+            button.dir = "ltr"; 
+
+            button.addEventListener('click', () => selectAnswer(button));
+            return button;
+        }
+
+        /** معالجة اختيار الإجابة */
+        function selectAnswer(selectedButton) {
+            if (answerSelected) return; 
+            answerSelected = true;
+
+            const currentQuestion = allQuestions[currentQuestionIndex];
+            const selectedValue = selectedButton.dataset.value;
+            
+            const correctAnswer = currentQuestion.answer;
+            let isCorrect = (selectedValue === correctAnswer);
+
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('opacity-70', 'cursor-not-allowed');
+            });
+
+            if (isCorrect) {
+                score++;
+                selectedButton.classList.add('correct');
+                feedbackEl.textContent = 'إجابة صحيحة!';
+                feedbackEl.className = 'text-center text-xl font-bold mt-6 min-h-[2rem] text-green-500';
+            } else {
+                selectedButton.classList.add('incorrect');
+                feedbackEl.textContent = 'إجابة خاطئة!';
+                feedbackEl.className = 'text-center text-xl font-bold mt-6 min-h-[2rem] text-red-500';
+
+                const correctValue = String(correctAnswer);
+                const correctButton = optionsContainer.querySelector(`button[data-value="${correctValue.replace(/"/g, '\\"')}"]`);
+                if (correctButton) {
+                    correctButton.classList.add('correct');
+                }
+            }
+
+            nextBtn.classList.remove('hidden');
+        }
+
+        /** الانتقال للسؤال التالي أو إظهار النتائج */
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < allQuestions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        /** إظهار شاشة النتائج النهائية */
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            scoreEl.textContent = `لقد حصلت على ${score} من ${allQuestions.length}`;
+        }
+
+        // --- 5. ربط الأحداث ---
+        nextBtn.addEventListener('click', nextQuestion);
+        restartBtn.addEventListener('click', startQuiz);
+
+        // --- 6. بدء الاختبار عند تحميل الصفحة ---
+        startQuiz();
+    </script>
+</body>
+</html>
