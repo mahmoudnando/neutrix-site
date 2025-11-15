@@ -93,7 +93,7 @@
             { question: "Given the following processes and burst times... (Processes are assumed to have arrived all at time 0). What is the turnaround time of process P5 using the Shortest Job First (SJF)? <span class='missing-data-note'>(ملاحظة: بيانات الجدول مفقودة من المصدر)</span>", type: 'mcq', options: ['11 milliseconds'], answer: '11 milliseconds' },
             { question: "Below the structure of the Readers & Writers problem is shown... What are the initial values of mutex, wrt, and readCount?", type: 'mcq', options: ['mutex = 1, wrt = 1, readCount = 0', 'mutex = 0, wrt = 0, readCount = 1', 'mutex = 1, wrt = 0, readCount = 0'], answer: 'mutex = 1, wrt = 1, readCount = 0' },
             { question: "Suppose that a process is in \"BLOCKED\" state waiting for some I/O service. When the device is completed, it goes to the", type: 'mcq', options: ['BLOCKED state', 'READY state', 'SUSPENDED state', 'TERMINATED state'], answer: 'READY state' },
-            { question: "In the readers/writers problem, we want to allow a reader and a writer to be in their critical sections for the shared data at the same time.", type: 'tf', answer: false },
+            { question: "In the readers/writers problem, we want to allow a reader and a writer to be in their critical sections for the shared data at the same time.", type: 'tf', answer: true },
             { question: "If process A is waiting for a nonpreemptible resource that is held by process B and process B is waiting for a nonpreemptable resource that is held by A, that is called:", type: 'mcq', options: ['starvation', 'livelock', 'deadlock', 'busy waiting', 'mutual exclusion', 'coroutine'], answer: 'deadlock' },
             { question: "Consider the following snapshot of a system: Is the system in a safe state? If the system is safe, write a safe sequence. <span class='missing-data-note'>(ملاحظة: بيانات الجدول مفقودة من المصدر)</span>", type: 'mcq', options: ['< PO, P2, P1, P3, P4 >', 'Not safe'], answer: '< PO, P2, P1, P3, P4 >' },
             { question: "An unsafe state may not necessarily lead to deadlock", type: 'tf', answer: true },
@@ -252,4 +252,5 @@
         startQuiz();
     </script>
 </body>
+
 </html>
